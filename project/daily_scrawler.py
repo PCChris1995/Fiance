@@ -1,3 +1,9 @@
+'''/*
+ * @Author: PCChris: https://github.com/PCChris1995/Fiance 
+ * @Date: 2018-09-07 09:35:36 
+ * @Last Modified by: PCChris
+ * @Last Modified time: 2018-09-07 10:16:01
+ */'''
 #  -*- coding: utf-8 -*-
 
 from database import DB_CONN
@@ -125,7 +131,6 @@ class DailyCrawler:
         }
         return doc
 
-
     def threads_get_stocks(self, codes=None):
         '''
         多线程爬取股票日线数据
@@ -165,6 +170,3 @@ if __name__ == '__main__':
     # print(None_stock_D_data)
     # codes = list(ts.get_stock_basics().index)
     # threads = []
-    
-
-

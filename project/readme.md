@@ -1,3 +1,10 @@
+/*
+ * @Author: PCChris: https://github.com/PCChris1995/Fiance 
+ * @Date: 2018-09-07 10:24:34 
+ * @Last Modified by:   PCChris 
+ * @Last Modified time: 2018-09-07 10:24:34 
+ */
+
 ### 2018-9-1 
 创建一个projects, 复现数据下载和存储功能
 `daily_scrawler.py` 从tushare上下载数据并保存到mongodb中

@@ -1,9 +1,11 @@
+'''/*
+ * @Author: PCChris: https://github.com/PCChris1995/Fiance 
+ * @Date: 2018-09-07 10:23:42 
+ * @Last Modified by:   PCChris 
+ * @Last Modified time: 2018-09-07 10:23:42 
+ */'''
 #coding:utf-8
-'''
-      File      : cpuUsage.py
-      Author    : Mike
-      E-Mail    : Mike_Zhang@live.com
-'''
+
 import matplotlib.pyplot as plt
 import string
 def getCpuInfData(fileName):

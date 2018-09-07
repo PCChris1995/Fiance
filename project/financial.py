@@ -1,3 +1,9 @@
+'''/*
+ * @Author: PCChris: https://github.com/PCChris1995/Fiance 
+ * @Date: 2018-09-07 09:35:36 
+ * @Last Modified by: PCChris
+ * @Last Modified time: 2018-09-07 10:16:01
+ */'''
 #-*- coding:UTF-8 -*-
 import sys
 import pymysql
