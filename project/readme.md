@@ -27,3 +27,6 @@
 ### 2018-09-06
 完成了数据的修复功能的代码
 `daily_fix.py`: 完成数据的修复功能，并加上复权因子的计算
+`scheduled_crawl_task.py `:增加定时入库功能
+将`daily_scrawler.py`增加多线程功能，数据下载时间缩短到两个小时以内
+`pe_computing`：计算pe,并存入数据库中

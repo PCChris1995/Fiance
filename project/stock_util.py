@@ -44,15 +44,16 @@ def get_all_codes(date=None):
     '''
     得到数据库中所有股票的code
 
-    parameter: date,指定日期
+    parameter: 
+    date: 指定日期, 如果没有指定则选的是2018-09-03日的股票代码
     return： codes type: list
     '''
     if date is None:
-        date = datetime.now().strftime('%Y-%m-%d')
+        date = '2018-09-04'
     # 从数据库中取出code
     codes = []
     while len(codes) == 0:
-        code_cursor = DB_CONN.basic.find(
+        code_cursor = DB_CONN.daily_hfq.find(
             {'date': date}, 
             projection={'code': True, '_id': False}
         ).hint([('date', -1)])
@@ -62,7 +63,7 @@ def get_all_codes(date=None):
 
 
 if __name__ == '__main__':
-    dates = get_trading_dates()
-    print(dates)
+    codes = get_all_codes()
+    print(len(codes))
     # codes = get_all_codes()
     # print(len(codes))

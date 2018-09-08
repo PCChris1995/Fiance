@@ -18,6 +18,8 @@ import os
 import time
 import pandas as pd 
 from finance_util import finance_util
+import threading
+import tushare as ts
 
 
 class finance_wangyi:
@@ -120,12 +122,15 @@ class finance_xiaoxiang:
     def crawl_single_page(page):
         pass
 
-    def crawl_finance_report(self):
+    def crawl_finance_report(self, codes=None):
         '''
         爬去股票股票的eps,并保存到数据库中
         '''
         # 获取数据库中所有股票的code
-        codes = get_all_codes()
+        if codes is None:
+            codes = list(ts.get_stock_basics().index)
+        if isinstance(codes, list) is False:
+            codes = [codes]
         # 测试函数功能
         # codes = ['000001', '600048']
         # 爬取股票财务数据
@@ -155,6 +160,7 @@ class finance_xiaoxiang:
             except:
                 print('ERROR: finance, code: %s, reprot_date: %s, announced_date: %s' % 
                 (code, report['reportdate'], doc['annouced_date']))
+                
             # 将数据保存到数据库中
             if len(update_requests) > 0:
                 DB_CONN['finance_report'].create_index([('code', 1), ('report_date', -1)], background=True)
@@ -162,6 +168,27 @@ class finance_xiaoxiang:
                 print('code: %s, finance data, update: %4d, insert %4d, match: %4d' %
                  (code, request_result.modified_count, request_result.upserted_count, request_result.matched_count))
 
+    def threads_get_finance_report(self, codes=None):
+        '''
+        多线程爬取股票日线数据
+
+        使用说明：
+        使用时在main中加入如下代码：
+        codes, threads = DailyCrawler().threads_get_stocks()
+        for i in range(len(codes)):
+            threads[i].start()
+         for i in range(len(codes)):
+            threads[i].join()
+        '''
+        # codes = get_all_codes()
+        if codes is None:
+            codes = list(ts.get_stock_basics().index)
+        threads = []
+        # dates = get_trading_dates()
+        for code in codes:
+            t = threading.Thread(target=self.crawl_finance_report, args=(code, ))
+            threads.append(t)
+        return codes, threads
 
 if __name__ == '__main__':
     # aa = FinancialData()
@@ -171,5 +198,10 @@ if __name__ == '__main__':
     # test = finance_wangyi()
     # data = test.financial_indicators_crawler(['600048'], option='income')
     # print(data['600048'])
-    dd = finance_xiaoxiang()
-    dd.crawl_finance_report()
+    # dd = finance_xiaoxiang()
+    # dd.crawl_finance_report()
+    codes, threads = finance_xiaoxiang().threads_get_finance_report()
+    for i in range(len(codes)):
+        threads[i].start()
+    for i in range(len(codes)):
+        threads[i].join()
