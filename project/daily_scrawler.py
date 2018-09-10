@@ -39,9 +39,14 @@ class DailyCrawler:
             end_date = datetime.now().strftime('%Y-%m-%d')
         # 从tushare中获取数据
         for index in index_codes:
-            qfq_index_D_data = ts.get_k_data(index, start=start_date, end=end_date)
-        # 将整理后的数据保存到数据库中
-            self.save_data_to_mongodb(index, qfq_index_D_data, self.daily_hfq, {'index':True})
+            qfq_index_D_data = ts.get_k_data(index, start=start_date, end=end_date, index=True)
+            if qfq_index_D_data is not None:
+                # 将整理后的数据保存到数据库中
+                self.save_data_to_mongodb(index, qfq_index_D_data, self.daily_none, {'index':True})
+                # 抓取后复权
+                hfq_stock_D_data = ts.get_k_data(index, autype='hfq', index=True, start=start_date, end=end_date)
+                # 将整理后的数据保存到本地的数据库中
+                self.save_data_to_mongodb(index, hfq_stock_D_data, self.daily_hfq, {'index':True})
        
     def crawl_stocks(self, codes=None, start_date=None, end_date=None):
         '''
@@ -156,15 +161,15 @@ class DailyCrawler:
 
 if __name__ == '__main__':
     a = DailyCrawler()
-    # data = a.crawl_index()
-    codes, threads = a.threads_get_stocks()
-    start = datetime.now()
-    for i in range(len(codes)):
-        threads[i].start()
-    for i in range(len(codes)):
-        threads[i].join()
-    end = datetime.now()
-    print('spend %s' % (end-start))
+    data = a.crawl_index(start_date='2018-01-01', end_date='2018-09-01')
+    # codes, threads = a.threads_get_stocks()
+    # start = datetime.now()
+    # for i in range(len(codes)):
+    #     threads[i].start()
+    # for i in range(len(codes)):
+    #     threads[i].join()
+    # end = datetime.now()
+    # print('spend %s' % (end-start))
     # a.crawl_stocks()
     # None_stock_D_data = ts.get_k_data('600048', autype=None, start='2018-08-01', end='2018-08-31') 
     # print(None_stock_D_data)
