@@ -1,8 +1,8 @@
 /*
  * @Author: PCChris: https://github.com/PCChris1995/Fiance 
  * @Date: 2018-09-07 10:24:34 
- * @Last Modified by:   PCChris 
- * @Last Modified time: 2018-09-07 10:24:34 
+ * @Last Modified by: PCChris
+ * @Last Modified time: 2018-09-12 10:26:58
  */
 
 ### 2018-9-1 
@@ -30,3 +30,16 @@
 `scheduled_crawl_task.py `:增加定时入库功能
 将`daily_scrawler.py`增加多线程功能，数据下载时间缩短到两个小时以内
 `pe_computing`：计算pe,并存入数据库中
+
+### 2018-09-07
+增加挑选股票池函数
+`stock_pool_strategy.py`
+
+### 2018-09-10
+`threads.py`:增加多线程函数，实现数据爬取，修复的多线程功能
+
+### 2018-09-11
+`backtest.py`增加回测函数
+
+### 2018-09-12
+`trading_strategy.py`: 增加策略函数，目前是策略和10日均线有关
