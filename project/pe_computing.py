@@ -1,8 +1,8 @@
-# /*
+
 #  * @Author: PCChris: https://github.com/PCChris1995/Fiance 
 #  * @Date: 2018-09-07 10:40:15 
 #  * @Last Modified by: PCChris
-#  * @Last Modified time: 2018-09-07 10:55:40
+#  * @Last Modified time: 2018-09-08 09:18:07 
 #  */
 
 from stock_util import get_all_codes
@@ -11,7 +11,11 @@ from pymongo import DESCENDING, UpdateOne
 from finance_report_crawler import finance_xiaoxiang
 import threading
 
+
 def pe_computing(codes=None):
+    '''
+    利用eps和close计算股票的pe,并保存到mongodb中
+    '''
     # 从finance_report中取出eps
     if codes is None:
         codes = get_all_codes()

@@ -13,12 +13,14 @@ from datetime import datetime, timedelta
 from stock_util import get_trading_dates, get_all_codes
 import os
 from daily_scrawler import DailyCrawler
+import threading
+from threads import threads_dates, threads_codes
 '''
 修复采集到的日线数据
 '''
 
 
-def fill_is_trading_between(begin_date=None, end_date=None):
+def fill_is_trading_between(begin_date=None, end_date=None, dates=None):
     '''
     填充指定时间段内的is_trading字段
 
@@ -28,10 +30,15 @@ def fill_is_trading_between(begin_date=None, end_date=None):
     '''
 
     # 得到时间段
-    all_trading_dates = get_trading_dates(begin_date, end_date)
+    if dates is None:
+        all_trading_dates = get_trading_dates(begin_date, end_date)
+    else: 
+        if isinstance(dates, list) is False:
+            dates = [dates]
+        all_trading_dates = dates
     # 填充单个数据
     for trading_date in all_trading_dates:
-        fill_single_date_is_trading(trading_date, 'daily')
+        fill_single_date_is_trading(trading_date, 'daily_none')
         fill_single_date_is_trading(trading_date, 'daily_hfq')
 
 
@@ -67,7 +74,7 @@ def fill_single_date_is_trading(date=None, collection='daily_hfq'):
             (daily['code'], date, collection, update_result.upserted_count, update_result.modified_count))
 
 
-def fill_daily_k_supension_days(begin_date=None, end_date=None):
+def fill_daily_k_supension_days(begin_date=None, end_date=None, dates=None):
     '''
     补充股票在停牌日的数据
 
@@ -76,7 +83,12 @@ def fill_daily_k_supension_days(begin_date=None, end_date=None):
     end_date: 结束日期， 为None时为数据库中能找到的最新日期
     '''
     # 找到指定时间段所有的交易日期
-    all_dates = get_trading_dates(begin_date, end_date)
+    if dates is None:
+        all_dates = get_trading_dates(begin_date, end_date)
+    else:
+        if isinstance(dates, list) is False:
+            dates = [dates]
+        all_dates = dates
 
     # 找到所有股票的上市日期
     basic_date = datetime.now().strftime('%Y-%m-%d')
@@ -97,8 +109,8 @@ def fill_daily_k_supension_days(begin_date=None, end_date=None):
             is_supension_flag = is_supension(date, code)
             # 对停牌日期补充数据
             if is_supension_flag:
-                doc_daily = fill_daily_k_supension_days_at_date_one_collection(date, code, basic, 'daily_none')
-                doc_daily_hfq = fill_daily_k_supension_days_at_date_one_collection(date, code, basic, 'daily_hfq')
+                fill_daily_k_supension_days_at_date_one_collection(date, code, basic, 'daily_none')
+                fill_daily_k_supension_days_at_date_one_collection(date, code, basic, 'daily_hfq')
             # 将补充的数据更新到数据库中
 
 
@@ -171,7 +183,7 @@ def fill_daily_k_supension_days_at_date_one_collection(date, code, basic, collec
                      (collection, date, code, update_result.upserted_count, update_result.modified_count), flush=True)
 
 
-def fill_au_factor_pre_close(begin_date=None, end_date=None):
+def fill_au_factor_pre_close(begin_date=None, end_date=None, codes=None):
     """
     为daily数据集填充：
     1. 复权因子au_factor，复权的因子计算方式：au_factor = hfq_close/close
@@ -179,7 +191,12 @@ def fill_au_factor_pre_close(begin_date=None, end_date=None):
     :param begin_date: 开始日期
     :param end_date: 结束日期
     """
-    all_codes = get_all_codes()
+    if codes is None:
+        all_codes = get_all_codes()
+    else:
+        if isinstance(codes, list) is False:
+            codes = [codes]
+        all_codes = codes
 
     if begin_date is None:
         begin_date = '2008-01-01'
@@ -190,7 +207,7 @@ def fill_au_factor_pre_close(begin_date=None, end_date=None):
         hfq_daily_cursor = DB_CONN['daily_hfq'].find(
             {'code': code, 'date': {'$lte': end_date, '$gte': begin_date}, 'index': False},
             sort=[('date', ASCENDING)],
-            projection={'date': True, 'close': True}).hint([('code', 1), ('date', -1)])
+            projection={'date': True, 'close': True}).hint([('code', 1), ('date', -1)]).hint([('code', 1), ('date',-1)])
 
         date_hfq_close_dict = dict([(x['date'], x['close']) for x in hfq_daily_cursor])
 
@@ -225,7 +242,7 @@ def fill_au_factor_pre_close(begin_date=None, end_date=None):
                         {'code': code, 'date': date, 'index': False},
                         {'$set': doc}))
             except:
-                print('ERROR happen when calculate au_factor，code：%s，date：%s' % (code, date), flush=True)
+                print('ERROR happen when calculate au_factor, code: %s，date: %s' % (code, date), flush=True)
                 # 恢复成初始值，防止用错
                 last_close = -1
                 last_au_factor = -1
@@ -236,7 +253,60 @@ def fill_au_factor_pre_close(begin_date=None, end_date=None):
                   (code, update_result.modified_count, update_result.upserted_count), flush=True)
 
 
+def threads_supension_days(begin_date=None, end_date=None, dates=None):
+    '''
+    多线程补充停牌数据
+
+    使用说明：
+    使用时在main中加入如下代码：
+    dates, threads = threads_supension_days()
+    for i in range(len(dates)):
+        threads[i].start()
+    for i in range(len(dates)):
+        threads[i].join()
+    '''
+    # codes = get_all_codes()
+    if dates is None:
+        dates = get_trading_dates(begin_date, end_date)
+    threads = []
+    # dates = get_trading_dates()
+    for date in dates:
+        t = threading.Thread(target=fill_daily_k_supension_days, args=(None, None, date))
+        threads.append(t)
+    return dates, threads
+
+
+def threads_fill_is_trading():
+    '''
+    多线程补充字段：is_trading
+
+    使用说明：
+    使用时在main中加入如下代码：
+    dates, threads = threads_fill_is_trading()
+    for i in range(len(dates)):
+        threads[i].start()
+    for i in range(len(dates)):
+        threads[i].join()
+    '''
+    # codes = get_all_codes()
+    dates = get_trading_dates()
+    threads = []
+    # dates = get_trading_dates()
+    for date in dates:
+        t = threading.Thread(target=fill_is_trading_between, args=(None, None, date))
+        threads.append(t)
+    length = len(dates)
+    return length, threads
+
+
 if __name__ == '__main__':
-    # fill_is_trading_between()   
+    # a = 
+    length, threads = threads_dates(begin_date='2017-01-01', end_date='2018-01-01', fun=fill_is_trading_between)
+    for i in range(length):
+        threads[i].start()
+    for i in range(length):
+        threads[i].join()
+    # length, threads = 
+    # fill_is_trading_between(begin_date='2018-01-01', end_date='2018-09-01')
     # fill_daily_k_supension_days(begin_date='2011-02-01')
-    fill_au_factor_pre_close()
+    # fill_au_factor_pre_close()

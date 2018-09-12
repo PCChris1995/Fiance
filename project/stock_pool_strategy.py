@@ -138,6 +138,24 @@ def evaluate_stock_pool(begin_date, end_date):
     df_profit.plot(title='Stock Pool Evaluation Result', grid=True, kind='line')
     plt.show()
 
+
+def find_out_stocks(this_phase_codes, last_phase_codes):
+    '''
+    找到需要跳出的股票code
+
+    parameter：
+    this_phase_codes: 这一期的股票list
+    last_phase_codes: 上一期的股票list
+
+    retrun:
+    out_codes: 需要跳出的股票list
+    '''
+    out_codes = []
+    for last_phase_code in last_phase_codes:
+        if last_phase_code not in this_phase_codes:
+            out_codes.append(last_phase_code)
+    return out_codes
+
 if __name__ == '__main__':
     # all_adjust_dates, adjust_date_codes_dict = stock_pool(begin_date='2018-01-01', end_date='2018-09-01')
     evaluate_stock_pool('2018-01-01', '2018-09-01')
