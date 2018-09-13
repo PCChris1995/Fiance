@@ -281,4 +281,4 @@ def compute_sharpe_ratio(net_profit):
 
 
 if __name__ == '__main__':
-    backtest('2018-01-01', '2018-09-01')
+    backtest('2018-01-20', '2018-09-01')

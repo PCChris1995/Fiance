@@ -54,7 +54,8 @@ def fill_single_date_is_trading(date=None, collection='daily_hfq'):
         {'date': date},
         projection={'code': True, '_id': False, 'volume': True},
         batch_size=1000
-    )
+    ).hint([('code', 1), ('date', -1)])
+    
     # 判断是否为交易日
     update_requests = []
     for daily in daily_cursor:
@@ -301,7 +302,7 @@ def threads_fill_is_trading():
 
 if __name__ == '__main__':
     # a = 
-    length, threads = threads_dates(begin_date='2017-01-01', end_date='2018-01-01', fun=fill_is_trading_between)
+    length, threads = threads_dates(begin_date='2018-09-03', end_date='2018-09-03', fun=fill_is_trading_between)
     for i in range(length):
         threads[i].start()
     for i in range(length):
