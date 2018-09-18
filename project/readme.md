@@ -43,3 +43,9 @@
 
 ### 2018-09-12
 `trading_strategy.py`: 增加策略函数，目前是策略和10日均线有关
+
+### 2018-09-18
+`strategy_ma10.py`：将10日均线策略改名
+#### 增加技术指标文件:
+`rsi_factor.py`
+`macd_factor.py`
