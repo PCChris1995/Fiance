@@ -2,8 +2,9 @@
  * @Author: PCChris: https://github.com/PCChris1995/Fiance 
  * @Date: 2018-09-07 10:24:34 
  * @Last Modified by: PCChris
- * @Last Modified time: 2018-09-12 10:26:58
+ * @Last Modified time: 2018-09-18 11:48:11
  */
+
 
 ### 2018-9-1 
 创建一个projects, 复现数据下载和存储功能
@@ -49,3 +50,5 @@
 #### 增加技术指标文件:
 `rsi_factor.py`
 `macd_factor.py`
+`boll_factor.py`
+`fractal_factor.py`
