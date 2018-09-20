@@ -10,12 +10,16 @@ from stock_pool_strategy import stock_pool, find_out_stocks
 from database import daily_collection, daily_hfq_collection
 from datetime import datetime
 import matplotlib.pyplot as plt
-from trading_strategy import is_k_down_break_m10, is_k_up_break_ma10
+from strategy.strategy_ma10 import is_k_down_break_m10, is_k_up_break_ma10
+from strategy.macd_factor import is_macd_dead, is_macd_gold
 
 
-def backtest(begin_date, end_date):
+def backtest(begin_date, end_date, fun_sell, fun_buy):
     '''
     回测系统
+    parameter:
+    fun_sell: 卖出信号
+    fun_buy: 买入信号函数
     '''
     # 设置初始值
     cash = 1E7
@@ -131,13 +135,13 @@ def backtest(begin_date, end_date):
                         to_be_sold_codes.add(out_code)
 
         for holding_code in holding_codes:
-            if is_k_down_break_m10(holding_code, _date):
+            if fun_sell(holding_code, _date):
                 to_be_sold_codes.add(holding_code)
                 
         to_be_bought_codes.clear()
         if this_phase_codes is not None:
             for _code in this_phase_codes:
-                if _code not in holding_codes and is_k_up_break_ma10(_code, _date):
+                if _code not in holding_codes and fun_buy(_code, _date):
                     to_be_bought_codes.add(_code)
 
         # 计算持仓股票市值
@@ -281,4 +285,4 @@ def compute_sharpe_ratio(net_profit):
 
 
 if __name__ == '__main__':
-    backtest('2018-01-20', '2018-09-01')
+    backtest('2018-01-20', '2018-09-01', is_macd_dead, is_macd_gold)

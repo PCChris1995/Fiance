@@ -3,7 +3,7 @@ from stock_util import get_trading_dates, get_all_codes
 import threading
 # from daily_fix import fill_is_trading_between
 import tushare as ts 
-from test import test_fun, class_test
+# from test import test_fun, class_test
 
 
 def threads_dates(begin_date, end_date, fun):
@@ -39,11 +39,14 @@ def threads_codes(fun):
     parm: fun的参数，如： （code, none, none）
     使用说明：
     使用时在main中加入如下代码：
-    codes, threads = threads_codes()
-    for i in range(len(codes)):
+    time_start = time.now()
+    length, threads = threads_codes()
+    for i in range(length):
         threads[i].start()
-        for i in range(len(codes)):
+    for i in range(length):
         threads[i].join()
+    time_end = time.now()
+    print(time_start - time_end)
     '''
     # codes = get_all_codes()
     codes = list(ts.get_stock_basics().index)
